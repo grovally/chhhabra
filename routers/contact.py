@@ -1,27 +1,16 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import os
-import aiosmtplib
-from email.message import EmailMessage
+import resend
 from dotenv import load_dotenv
 
 load_dotenv()
 
 router = APIRouter()
 
+# Resend API Key
+resend.api_key = os.getenv("RESEND_API_KEY")
 
-# ==============================
-# EMAIL CONFIGURATION
-# ==============================
-
-EMAIL_USER = os.getenv("EMAIL_USER")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
-
-
-# ==============================
-# CONTACT FORM
-# ==============================
 
 class ContactForm(BaseModel):
     name: str
@@ -31,84 +20,40 @@ class ContactForm(BaseModel):
     message: str
 
 
-# ==============================
-# CONTACT API
-# ==============================
-
 @router.post("/contact")
 async def contact(form: ContactForm):
 
-    # Check environment variables
-    if not EMAIL_USER:
+    if not resend.api_key:
         raise HTTPException(
             status_code=500,
-            detail="EMAIL_USER is missing"
+            detail="RESEND_API_KEY is missing"
         )
-
-    if not EMAIL_PASSWORD:
-        raise HTTPException(
-            status_code=500,
-            detail="EMAIL_PASSWORD is missing"
-        )
-
-    if not RECEIVER_EMAIL:
-        raise HTTPException(
-            status_code=500,
-            detail="RECEIVER_EMAIL is missing"
-        )
-
-    # ==============================
-    # CREATE EMAIL
-    # ==============================
-
-    msg = EmailMessage()
-
-    msg["Subject"] = f"New Contact Form - {form.subject}"
-
-    msg["From"] = EMAIL_USER
-
-    msg["To"] = RECEIVER_EMAIL
-
-    # Customer ke email par directly reply karne ke liye
-    msg["Reply-To"] = form.email
-
-    msg.set_content(
-        f"""
-New Contact Form
-================
-
-Name: {form.name}
-
-Phone: {form.phone}
-
-Email: {form.email}
-
-Subject:
-{form.subject}
-
-Message:
-{form.message}
-"""
-    )
-
-    # ==============================
-    # SEND EMAIL
-    # ==============================
 
     try:
 
-        await aiosmtplib.send(
-            msg,
-            hostname="smtp.gmail.com",
-            port=465,
-            use_tls=True,
-            username=EMAIL_USER,
-            password=EMAIL_PASSWORD,
-        )
+        response = resend.Emails.send({
+            "from": "onboarding@resend.dev",
+            "to": "chhabrapropertiesofficial@gmail.com",
+            "reply_to": form.email,
+            "subject": f"New Contact Form - {form.subject}",
+            "html": f"""
+                <h2>New Contact Form</h2>
 
-        print("================================")
-        print("EMAIL SENT SUCCESSFULLY")
-        print("================================")
+                <p><strong>Name:</strong> {form.name}</p>
+
+                <p><strong>Phone:</strong> {form.phone}</p>
+
+                <p><strong>Email:</strong> {form.email}</p>
+
+                <p><strong>Subject:</strong> {form.subject}</p>
+
+                <h3>Message</h3>
+
+                <p>{form.message}</p>
+            """
+        })
+
+        print("RESEND RESPONSE:", response)
 
         return {
             "success": True,
@@ -117,9 +62,7 @@ Message:
 
     except Exception as e:
 
-        print("================================")
-        print("EMAIL ERROR:", repr(e))
-        print("================================")
+        print("RESEND ERROR:", repr(e))
 
         raise HTTPException(
             status_code=500,
