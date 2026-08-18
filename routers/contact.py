@@ -9,9 +9,9 @@ load_dotenv()
 
 router = APIRouter()
 
-EMAIL_USER = os.getenv("EMAIL_USER")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
+EMAIL_USER = os.getenv("chhabrapropertiesofficial@gmail.com")
+EMAIL_PASSWORD = os.getenv("jcwljlqppfaxswzy")
+RECEIVER_EMAIL = os.getenv("chhabrapropertiesofficial@gmail.com")
 
 
 class ContactForm(BaseModel):
