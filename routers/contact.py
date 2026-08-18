@@ -9,7 +9,6 @@ load_dotenv()
 
 router = APIRouter()
 
-# .env se values read hongi
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
@@ -26,10 +25,23 @@ class ContactForm(BaseModel):
 @router.post("/contact")
 async def contact(form: ContactForm):
 
-    if not EMAIL_USER or not EMAIL_PASSWORD or not RECEIVER_EMAIL:
+    # Check environment variables
+    if not EMAIL_USER:
         raise HTTPException(
             status_code=500,
-            detail="Email configuration is missing"
+            detail="EMAIL_USER is missing"
+        )
+
+    if not EMAIL_PASSWORD:
+        raise HTTPException(
+            status_code=500,
+            detail="EMAIL_PASSWORD is missing"
+        )
+
+    if not RECEIVER_EMAIL:
+        raise HTTPException(
+            status_code=500,
+            detail="RECEIVER_EMAIL is missing"
         )
 
     msg = EmailMessage()
@@ -57,6 +69,7 @@ Message:
     )
 
     try:
+
         await aiosmtplib.send(
             msg,
             hostname="smtp.gmail.com",
@@ -66,15 +79,20 @@ Message:
             password=EMAIL_PASSWORD,
         )
 
+        print("EMAIL SENT SUCCESSFULLY")
+
         return {
             "success": True,
             "message": "Email sent successfully"
         }
 
     except Exception as e:
-        print("EMAIL ERROR:", str(e))
+
+        print("================================")
+        print("EMAIL ERROR:", repr(e))
+        print("================================")
 
         raise HTTPException(
             status_code=500,
-            detail="Failed to send email"
+            detail=f"Email sending failed: {str(e)}"
         )
