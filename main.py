@@ -7,7 +7,7 @@ from routers.blog import router as blog_router
 
 
 app = FastAPI(
-    title="Chhabra Properties API"
+    title="Grovally Group API"
 )
 
 
@@ -18,10 +18,14 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        # Local development
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://chhabra-properties.com",
-        "https://www.chhabra-properties.com",
+
+      
+        # Grovally
+        "https://grovally.com",
+        "https://www.grovally.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -53,7 +57,17 @@ app.include_router(
 
 @app.get("/")
 def home():
-
     return {
-        "message": "Chhabra Properties server is running"
+        "message": "Grovally server is running"
+    }
+
+
+# ==============================
+# HEALTH CHECK
+# ==============================
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok"
     }
