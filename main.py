@@ -60,7 +60,7 @@ app.include_router(
 @app.get("/")
 def home():
     return {
-        "message": "Grovally server is running"
+        "message": "chhabra server is running"
     }
 
 
