@@ -7,7 +7,7 @@ from routers.blog import router as blog_router
 
 
 app = FastAPI(
-    title="Grovally Group API"
+    title="chhabra  API"
 )
 
 
@@ -15,19 +15,18 @@ app = FastAPI(
 # CORS
 # ==============================
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         # Local development
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://chhabra-properties.com"
-          "https://www.chhabra-properties.com",
 
-      
-        # Grovally
-        "https://grovally.com",
-        "https://www.grovally.com",
+        # Production website
+        "https://chhabra-properties.com",
+        "https://www.chhabra-properties.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
