@@ -72,3 +72,36 @@ def health():
     return {
         "status": "ok"
     }
+@app.get("/")
+def home():
+
+    return {
+        "message": "Chhabra Properties server is running"
+    }
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+
+    blogs = blogs_collection.find(
+        {"published": True}
+    ).sort(
+        "createdAt",
+        -1
+    )
+
+    urls = []
+    for blog in blogs:
+        slug = blog.get("slug")
+        if slug:
+            urls.append(
+                f"<url><loc>https://chhabra-properties.com/blog/{slug}</loc></url>"
+            )
+
+    xml = """<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
+{items}
+</urlset>
+""".format(items="\n".join(urls))
+
+    return Response(content=xml, media_type="application/xml")
